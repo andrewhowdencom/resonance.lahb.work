@@ -1,0 +1,5 @@
+{
+  "name": "Resonance",
+  "description": "A mobile-optimized resonant breathing app designed to maximize heart rate variability and vagal tone through paced 0.1Hz respiratory cycles.",
+  "requestFramePermissions": []
+}
