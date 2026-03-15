@@ -176,6 +176,10 @@ export const Settings: React.FC<Props> = ({ settings, onUpdate, onClose }) => {
         >
           Save Changes
         </button>
+
+        <div className="mt-4 text-center">
+          <p className="text-[10px] text-slate-400">Version {__APP_VERSION__}</p>
+        </div>
       </motion.div>
     </div>
   );

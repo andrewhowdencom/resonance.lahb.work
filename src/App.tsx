@@ -3,6 +3,8 @@ import { motion, AnimatePresence } from 'motion/react';
 import { Play, Pause, RotateCcw, Settings as SettingsIcon, Wind, CheckCircle2, HelpCircle } from 'lucide-react';
 import { BreathingWave } from './components/BreathingWave';
 import { Settings } from './components/Settings';
+
+import { ServiceWorkerToast } from './components/ServiceWorkerToast'
 import { Help } from './components/Help';
 import { DEFAULT_SETTINGS, BreathingSettings } from './types';
 
@@ -181,6 +183,7 @@ export default function App() {
         )}
       </AnimatePresence>
 
+      <ServiceWorkerToast />
       {/* Help Modal */}
       <AnimatePresence>
         {showHelp && (
