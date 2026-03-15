@@ -6,8 +6,22 @@ import { Settings } from './components/Settings';
 import { DEFAULT_SETTINGS, BreathingSettings } from './types';
 
 export default function App() {
-  const [settings, setSettings] = useState<BreathingSettings>(DEFAULT_SETTINGS);
+  const [settings, setSettings] = useState<BreathingSettings>(() => {
+    const saved = localStorage.getItem('resonance_settings');
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch (e) {
+        console.error('Failed to parse settings from local storage', e);
+      }
+    }
+    return DEFAULT_SETTINGS;
+  });
   const [isPaused, setIsPaused] = useState(true);
+
+  useEffect(() => {
+    localStorage.setItem('resonance_settings', JSON.stringify(settings));
+  }, [settings]);
   const [timeLeft, setTimeLeft] = useState(settings.duration);
   const [isCompleted, setIsCompleted] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
