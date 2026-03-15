@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Play, Pause, RotateCcw, Settings as SettingsIcon, Wind, CheckCircle2, HelpCircle } from 'lucide-react';
 import { BreathingWave } from './components/BreathingWave';
@@ -29,6 +29,60 @@ export default function App() {
   const [isCompleted, setIsCompleted] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
+
+  // Wake lock ref
+  const wakeLock = useRef<WakeLockSentinel | null>(null);
+
+  const isRunning = !isPaused && timeLeft > 0;
+
+  const requestWakeLock = async () => {
+    if ('wakeLock' in navigator) {
+      try {
+        wakeLock.current = await navigator.wakeLock.request('screen');
+      } catch (err) {
+        console.error('Wake Lock request failed:', err);
+      }
+    }
+  };
+
+  const releaseWakeLock = async () => {
+    if (wakeLock.current !== null) {
+      const lock = wakeLock.current;
+      wakeLock.current = null; // Clear immediately to avoid race conditions
+      try {
+        await lock.release();
+      } catch (err) {
+        console.error('Wake Lock release failed:', err);
+      }
+    }
+  };
+
+  // Manage wake lock based on session state
+  useEffect(() => {
+    if (isRunning) {
+      requestWakeLock();
+    } else {
+      releaseWakeLock();
+    }
+
+    return () => {
+      releaseWakeLock();
+    };
+  }, [isRunning]);
+
+  // Re-request wake lock when document becomes visible again
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible' && isRunning) {
+        requestWakeLock();
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [isRunning]);
 
   // Reset timer when duration setting changes
   useEffect(() => {
