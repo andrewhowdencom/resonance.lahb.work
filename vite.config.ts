@@ -17,8 +17,8 @@ export default defineConfig(({mode}) => {
         registerType: 'prompt',
         includeAssets: ['icon.svg'],
         manifest: {
-          name: 'Breathe',
-          short_name: 'Breathe',
+          name: 'Resonance',
+          short_name: 'Resonance',
           description: 'A simple breathing app with haptic feedback',
           theme_color: '#10b981',
           background_color: '#ffffff',

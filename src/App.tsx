@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Play, Pause, RotateCcw, Settings as SettingsIcon, Wind, CheckCircle2 } from 'lucide-react';
+import { Play, Pause, RotateCcw, Settings as SettingsIcon, Wind, CheckCircle2, HelpCircle } from 'lucide-react';
 import { BreathingWave } from './components/BreathingWave';
 import { Settings } from './components/Settings';
-import { ServiceWorkerToast } from './components/ServiceWorkerToast';
+
+import { ServiceWorkerToast } from './components/ServiceWorkerToast'
+import { Help } from './components/Help';
 import { DEFAULT_SETTINGS, BreathingSettings } from './types';
 
 export default function App() {
@@ -26,6 +28,7 @@ export default function App() {
   const [timeLeft, setTimeLeft] = useState(settings.duration);
   const [isCompleted, setIsCompleted] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
+  const [showHelp, setShowHelp] = useState(false);
 
   // Reset timer when duration setting changes
   useEffect(() => {
@@ -82,12 +85,20 @@ export default function App() {
           </div>
           <h1 className="text-lg font-medium tracking-tight text-slate-800">Resonance</h1>
         </div>
-        <button 
-          onClick={() => setShowSettings(true)}
-          className="p-2 hover:bg-slate-100 rounded-full transition-colors"
-        >
-          <SettingsIcon size={20} className="text-slate-400" />
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setShowHelp(true)}
+            className="p-2 hover:bg-slate-100 rounded-full transition-colors"
+          >
+            <HelpCircle size={20} className="text-slate-400" />
+          </button>
+          <button
+            onClick={() => setShowSettings(true)}
+            className="p-2 hover:bg-slate-100 rounded-full transition-colors"
+          >
+            <SettingsIcon size={20} className="text-slate-400" />
+          </button>
+        </div>
       </header>
 
       {/* Main Content */}
@@ -157,7 +168,7 @@ export default function App() {
       {/* Footer */}
       <footer className="p-8 text-center">
         <p className="text-[10px] text-slate-400 uppercase tracking-[0.3em]">
-          {isCompleted ? "Tap play to restart" : (isPaused ? "Tap play to begin" : "Breathe with the circle")}
+          {isCompleted ? "Tap play to restart" : (isPaused ? "Tap play to begin" : "Resonate with the circle")}
         </p>
       </footer>
 
@@ -173,6 +184,12 @@ export default function App() {
       </AnimatePresence>
 
       <ServiceWorkerToast />
+      {/* Help Modal */}
+      <AnimatePresence>
+        {showHelp && (
+          <Help onClose={() => setShowHelp(false)} />
+        )}
+      </AnimatePresence>
     </div>
   );
 }
