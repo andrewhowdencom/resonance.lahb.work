@@ -4,10 +4,17 @@ import path from 'path';
 import fs from 'fs';
 import {defineConfig, loadEnv} from 'vite';
 import { VitePWA } from 'vite-plugin-pwa';
+import { execSync } from 'child_process';
 
 export default defineConfig(({mode}) => {
   const env = loadEnv(mode, '.', '');
   const packageJson = JSON.parse(fs.readFileSync('./package.json', 'utf-8'));
+  let gitRevision = packageJson.version;
+  try {
+    gitRevision = execSync('git rev-parse --short HEAD').toString().trim();
+  } catch (e) {
+    console.warn('Failed to get git revision, falling back to package.json version');
+  }
 
   return {
     plugins: [
@@ -40,7 +47,7 @@ export default defineConfig(({mode}) => {
     ],
     define: {
       'process.env.GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY),
-      '__APP_VERSION__': JSON.stringify(packageJson.version),
+      '__APP_VERSION__': JSON.stringify(gitRevision),
     },
     resolve: {
       alias: {
