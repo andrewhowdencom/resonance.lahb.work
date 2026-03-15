@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { Play, Pause, RotateCcw, Settings as SettingsIcon, Wind, CheckCircle2 } from 'lucide-react';
 import { BreathingWave } from './components/BreathingWave';
 import { Settings } from './components/Settings';
+import { ServiceWorkerToast } from './components/ServiceWorkerToast';
 import { DEFAULT_SETTINGS, BreathingSettings } from './types';
 
 export default function App() {
@@ -170,6 +171,8 @@ export default function App() {
           />
         )}
       </AnimatePresence>
+
+      <ServiceWorkerToast />
     </div>
   );
 }
