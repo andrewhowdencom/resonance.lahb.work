@@ -2,6 +2,38 @@ import React, { useEffect, useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { BreathingSettings } from '../types';
 
+// Web Audio API Context
+let audioCtx: AudioContext | null = null;
+
+const playTone = (frequency: number, type: OscillatorType = 'sine', duration = 0.5) => {
+  try {
+    if (!audioCtx) {
+      audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
+    }
+    if (audioCtx.state === 'suspended') {
+      audioCtx.resume();
+    }
+
+    const oscillator = audioCtx.createOscillator();
+    const gainNode = audioCtx.createGain();
+
+    oscillator.type = type;
+    oscillator.frequency.setValueAtTime(frequency, audioCtx.currentTime);
+
+    gainNode.gain.setValueAtTime(0, audioCtx.currentTime);
+    gainNode.gain.linearRampToValueAtTime(0.1, audioCtx.currentTime + 0.1);
+    gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+
+    oscillator.connect(gainNode);
+    gainNode.connect(audioCtx.destination);
+
+    oscillator.start(audioCtx.currentTime);
+    oscillator.stop(audioCtx.currentTime + duration);
+  } catch (e) {
+    console.error('Audio playback failed', e);
+  }
+};
+
 interface Props {
   settings: BreathingSettings;
   isPaused: boolean;
@@ -57,7 +89,7 @@ export const BreathingWave: React.FC<Props> = ({ settings, isPaused }) => {
   const prevPhaseRef = useRef<string | null>(null);
 
   useEffect(() => {
-    if (settings.hapticsEnabled && !isPaused && 'vibrate' in navigator) {
+    if (!isPaused) {
       const currentQuarter = Math.floor(progress * 4);
 
       if (phase !== prevPhaseRef.current) {
@@ -65,26 +97,35 @@ export const BreathingWave: React.FC<Props> = ({ settings, isPaused }) => {
         switch (phase) {
           case 'inhale':
             pattern = [50, 50, 50]; // Energetic triple pulse
+            if (settings.audioEnabled) playTone(432, 'sine', 0.8);
             break;
           case 'exhale':
             pattern = 200; // Long, smooth, calming pulse
+            if (settings.audioEnabled) playTone(216, 'sine', 1.2);
             break;
           case 'hold-post-inhale':
           case 'hold-post-exhale':
             pattern = [30, 60, 30]; // Sharp double tap
+            if (settings.audioEnabled) playTone(324, 'triangle', 0.3);
             break;
         }
-        navigator.vibrate(pattern);
+
+        if (settings.hapticsEnabled && 'vibrate' in navigator) {
+          navigator.vibrate(pattern);
+        }
+
         prevPhaseRef.current = phase;
         prevQuarterRef.current = 0;
       } else if (currentQuarter > prevQuarterRef.current && currentQuarter < 4) {
-        navigator.vibrate(15); // Small nudge
+        if (settings.hapticsEnabled && 'vibrate' in navigator) {
+          navigator.vibrate(15); // Small nudge
+        }
         prevQuarterRef.current = currentQuarter;
       } else if (currentQuarter < prevQuarterRef.current) {
         prevQuarterRef.current = currentQuarter;
       }
     }
-  }, [phase, progress, settings.hapticsEnabled, isPaused]);
+  }, [phase, progress, settings.hapticsEnabled, settings.audioEnabled, isPaused]);
 
   return (
     <div className="relative w-full h-80 flex flex-col items-center justify-center overflow-hidden">
